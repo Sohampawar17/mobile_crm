@@ -59,6 +59,14 @@ def get_employee_by_user(user, fields=["name"]):
     )
     return emp_data
 
+def role_profile(user):
+    try:
+            role = frappe.db.get_value("User",frappe.session.user,"role_profile_name")
+            return role
+    except Exception as e:
+        frappe.log_error(f"Error in role_profile function: {e}")
+        return None  # Return None or a default value to indicate the
+
 
 def validate_employee_data(employee_data):
     if not employee_data.get("company"):

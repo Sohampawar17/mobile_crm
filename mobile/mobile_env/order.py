@@ -90,7 +90,7 @@ def get_actual_qty(item_code,warehouse):
 def get_item_rate(item_code):
     item_price = frappe.get_all(
         "Item Price",
-        filters={"item_code": item_code},
+        filters={"item_code": item_code,"price_list":"Standard Selling"},
         fields=["price_list_rate"],
         order_by="creation desc",  # Add this to get the latest price
         limit=1  # Add this to get only the latest price
@@ -188,7 +188,7 @@ def create_order(**kwargs):
             sales_order_doc.run_method("set_missing_values")
             sales_order_doc.run_method("calculate_taxes_and_totals")
             sales_order_doc.save()
-            gen_response(200, "Order updated successfully.", sales_order_doc.name)
+            gen_response(200, "Order updated successfully.", sales_order_doc)
            
         else:
             sales_order_doc = frappe.get_doc(
@@ -214,7 +214,7 @@ def create_order(**kwargs):
                         }
                     )
                     file_doc.insert(ignore_permissions=True)
-            gen_response(200, "Order created successfully.", sales_order_doc.name)
+            gen_response(200, "Order created successfully.", sales_order_doc)
 
     except Exception as e:
         return exception_handel(e)

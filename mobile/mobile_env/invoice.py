@@ -190,7 +190,7 @@ def create_invoice(**kwargs):
             sales_invoice_doc.run_method("set_missing_values")
             sales_invoice_doc.run_method("calculate_taxes_and_totals")
             sales_invoice_doc.save()
-            gen_response(200, "Sales Invoice updated successfully.", sales_invoice_doc.name)
+            gen_response(200, "Sales Invoice updated successfully.", sales_invoice_doc)
            
         else:
             sales_invoice_doc = frappe.get_doc(dict(doctype="Sales Invoice", company=company))
@@ -210,7 +210,7 @@ def create_invoice(**kwargs):
                         }
                     )
                     file_doc.insert(ignore_permissions=True)
-            gen_response(200, "Sales Invoice created successfully.", sales_invoice_doc.name)
+            gen_response(200, "Sales Invoice created successfully.", sales_invoice_doc)
 
     except Exception as e:
         return exception_handel(e)

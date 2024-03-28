@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{user}-{date}",
  "creation": "2023-11-02 18:22:43.751649",
  "default_view": "List",
  "doctype": "DocType",
@@ -8,7 +9,10 @@
  "engine": "InnoDB",
  "field_order": [
   "user",
+  "column_break_jtul1",
+  "device_id",
   "date",
+  "section_break_4krbe",
   "my_location",
   "location_table",
   "check_data",
@@ -41,6 +45,7 @@
   {
    "fieldname": "check_data",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "check data"
   },
   {
@@ -49,14 +54,28 @@
    "fieldtype": "Float",
    "label": "Distance(in Km)",
    "precision": "2"
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID"
+  },
+  {
+   "fieldname": "column_break_jtul1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_4krbe",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-08 18:16:41.316523",
+ "modified": "2024-03-05 17:11:41.660237",
  "modified_by": "Administrator",
  "module": "Mobile",
  "name": "Employee Location",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

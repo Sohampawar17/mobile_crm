@@ -6,6 +6,20 @@ from mobile.mobile_env.app_utils import (
     get_employee_by_user,
     exception_handel,
 )
+from frappe.utils import (
+    cstr,
+    get_date_str,
+    today,
+    nowdate,
+    getdate,
+    now_datetime,
+    get_first_day,
+    get_last_day,
+    date_diff,
+    flt,
+    pretty_date,
+    fmt_money,
+)
 
 """save user location"""
 
@@ -34,23 +48,33 @@ from mobile.mobile_env.app_utils import (
 
 
 @frappe.whitelist()
-def user_location(**kwargs):
+def user_location(longitude, latitude,device_id):
     try:
-        data = kwargs
+       
+        data =  {
+        "device_id":device_id,
+        "location_table": [
+            {
+                "longitude": longitude,
+                "latitude": latitude 
+            }
+        ]
+    }
+
         if not data.get("location_table"):
             return gen_response(500, "location is required.")
         # current_employee = get_employee_by_user(frappe.session.user)
         if not frappe.db.exists(
             "Employee Location",
-            {"user":data.get("user"), 
-             "date": data.get("date")},
+            {"user":frappe.session.user, 
+             "date": today()},
             cache=True,
         ):
             location_doc = frappe.get_doc(
                 dict(
                     doctype="Employee Location",
-                    user=data.get("user"),
-                    date=data.get("date"),
+                    user=frappe.session.user,
+                    date=today(),
                 )
             )
             location_doc.update(data)
@@ -59,8 +83,8 @@ def user_location(**kwargs):
             location_doc = frappe.get_doc(
                 "Employee Location",
                 {
-                   "user":data.get("user"), 
-                    "date": data.get("date"),
+                   "user":frappe.session.user,
+                    "date": today(),
                 },
             )
             for location in data.get("location_table"):
@@ -95,8 +119,21 @@ def user_location(**kwargs):
             location_doc.location_map = compact_json
             location_doc.save()
 
-        gen_response(200, "Location updated successfully.")
+        gen_response(200, "Location updated successfully.",location_doc)
 
     except Exception as e:
         return exception_handel(e)
     
+    
+
+
+@frappe.whitelist()
+def getLocation():
+  try:
+    doc_name=frappe.get_value("Employee Location",{"user":frappe.session.user,"date":today()},"name")
+    if(doc_name):
+      doc = frappe.get_doc("Employee Location",doc_name)
+      gen_response(200, "Location get successfully.",doc)
+
+  except Exception as e:
+        return exception_handel(e)

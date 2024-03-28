@@ -74,7 +74,7 @@ def get_user_document():
 @frappe.whitelist()
 def user_has_permission():
     permission_list=[]
-    doclist=["sales Invoice","Sales Order","Lead","Quotation","Leave Application","Expense Claim","Attendance"]
+    doclist=["sales Invoice","Sales Order","Lead","Quotation","Leave Application","Expense Claim","Attendance","Customer"]
     for i in doclist:
         permission=has_permission(i)
         if permission:
@@ -111,6 +111,7 @@ def get_comments(reference_doctype=None, reference_name=None):
     reference_name: docname
     """
     try:
+        current_site=frappe.local.site
         filters = [
             ["Comment", "reference_doctype", "=", f"{reference_doctype}"],
             ["Comment", "reference_name", "=", f"{reference_name}"],
@@ -131,9 +132,14 @@ def get_comments(reference_doctype=None, reference_name=None):
             user_image = frappe.get_value(
                 "User", comment.comment_email, "user_image", cache=True
             )
-            comment["user_image"] = user_image
+            
+       
+            if user_image is not None:
+                comment["user_image"] = frappe.utils.get_url()+ user_image
+            else:
+                comment["user_image"] = None
             comment["commented"] = pretty_date(comment["creation"])
-            comment["creation"] = comment["creation"].strftime("%I:%M %p")
+            comment["creation"] = comment["creation"].strftime('%Y-%m-%d %H:%M %p')
 
         return gen_response(200, "Comment Getting Successfully", comments)
 
@@ -150,12 +156,13 @@ def get_dashboard():
         log_details = get_last_log_details(emp_data.get("name"))
         a,b=get_leave_balance_dashboard()
         current_site=frappe.local.site
+        permissionlist=user_has_permission()
         dashboard_data = {
            "leave_balance": b,
             # "latest_leave": {},
             # "latest_expense": {},
             # "latest_salary_slip": {},
-          
+            "permission_list":permissionlist,
             "last_log_type": log_details.get("log_type"),
            "attendance_details":attendance_details,
             "emp_name":emp_data.get("employee_name"),
@@ -170,7 +177,7 @@ def get_dashboard():
         )
        
         if str1 is not None:
-            dashboard_data["employee_image"] = "https://" + current_site + str1
+            dashboard_data["employee_image"] = frappe.utils.get_url() + str1
         else:
             dashboard_data["employee_image"] = None
             
@@ -197,7 +204,7 @@ def get_emp_name():
         )
        
         if str1 is not None:
-            dashboard_data["employee_image"] = "https://" + current_site + str1
+            dashboard_data["employee_image"] = frappe.utils.get_url()+ str1
         else:
             dashboard_data["employee_image"] = None
         return gen_response(200, "Dashboard data get successfully", dashboard_data)
@@ -265,7 +272,7 @@ def get_profile():
             "Employee", emp_data.get("name"), "image"
         )
         if image is not None:
-            employee_details["employee_image"] = frappe.utils.get_url() + '/'+ image
+            employee_details["employee_image"] = frappe.utils.get_url()+ image
         else:
             employee_details["employee_image"] = None
         
@@ -277,7 +284,7 @@ def get_profile():
 @frappe.whitelist()
 def change_status(doc_name,type):
     try:
-        frappe.db.set_value('Lead', doc_name, 'status', type, update_modified=True)
+        frappe.db.set_value('Lead', doc_name, 'custom_call_status', type, update_modified=True)
         return gen_response(200,'Status Changed')
     except Exception as e:
         return exception_handel(e)
@@ -377,7 +384,7 @@ def get_data_from_notes(doc_name):
             )
         frappe.msgprint(str1)
         if str1 is not None:
-            note_dict['image'] = frappe.utils.get_url() + '/'+ str1
+            note_dict['image'] = frappe.utils.get_url()+ str1
         else:
             note_dict['image'] = None
         

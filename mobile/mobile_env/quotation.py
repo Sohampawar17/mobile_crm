@@ -237,7 +237,7 @@ def create_order(**kwargs):
             sales_order_doc.run_method("set_missing_values")
             sales_order_doc.run_method("calculate_taxes_and_totals")
             sales_order_doc.save()
-            gen_response(200, "Order updated successfully.", sales_order_doc)
+            gen_response(200, "Quotation updated successfully.", sales_order_doc)
         else:
             sales_order_doc = frappe.get_doc(
                 dict(doctype="Quotation", company=company)
@@ -263,7 +263,7 @@ def create_order(**kwargs):
                     )
                     file_doc.insert(ignore_permissions=True)
 
-            gen_response(200, "Order created successfully.", sales_order_doc.name)
+            gen_response(200, "Quotation created successfully.", sales_order_doc)
 
     except Exception as e:
         return exception_handel(e)

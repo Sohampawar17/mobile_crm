@@ -46,13 +46,13 @@ def login(usr, pwd):
     try:
         login_manager = LoginManager()
         login_manager.authenticate(usr, pwd)
-        validate_employee(login_manager.user)
+        # validate_employee(login_manager.user)
         login_manager.post_login()
         if frappe.response["message"] == "Logged In":
             emp_data = get_employee_by_user(login_manager.user)
             frappe.response["user"] = login_manager.user
             frappe.response["key_details"] = generate_key(login_manager.user)
-            frappe.response["employee_id"] = emp_data.get("name")
+            # frappe.response["employee_id"] = emp_data.get("name")
         gen_response(200, frappe.response["message"])
     except frappe.AuthenticationError:
         gen_response(500, frappe.response["message"])
@@ -191,16 +191,17 @@ def get_dashboard():
 @frappe.whitelist()
 def get_emp_name():
     try:
-        emp_data = get_employee_by_user(frappe.session.user, fields=["name", "company","employee_name"])
-        current_site=frappe.local.site
+        emp_data = frappe.get_doc("User",frappe.session.user)
+        global_defaults = get_global_defaults()
+        company = global_defaults.get("default_company")
         dashboard_data = {
           
-            "emp_name":emp_data.get("employee_name"),
-            "email":frappe.session.user,
-            "company": emp_data.get("company") or "Employee Dashboard",
+            "emp_name":emp_data.full_name,
+            "email":emp_data.email,
+            "company": company if company else None,
         }
         str1=frappe.get_cached_value(
-            "Employee", emp_data.get("name"), "image"
+            "User",frappe.session.user, "user_image",
         )
        
         if str1 is not None:

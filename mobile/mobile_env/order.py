@@ -90,7 +90,7 @@ def get_actual_qty(item_code,warehouse):
 def get_item_rate(item_code):
     item_price = frappe.get_all(
         "Item Price",
-        filters={"item_code": item_code,"price_list":"Standard Selling"},
+        filters={"item_code": item_code},
         fields=["price_list_rate"],
         order_by="creation desc",  # Add this to get the latest price
         limit=1  # Add this to get only the latest price

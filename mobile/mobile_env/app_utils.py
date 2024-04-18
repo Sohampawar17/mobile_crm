@@ -57,7 +57,11 @@ def get_employee_by_user(user, fields=["name"]):
         fields,
         as_dict=1,
     )
+    if not emp_data:
+        return "Your employee profile has not been created. Please contact the HR manager to set up your profile."
+        
     return emp_data
+
 
 def role_profile(user):
     try:

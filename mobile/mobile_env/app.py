@@ -152,6 +152,8 @@ def get_comments(reference_doctype=None, reference_name=None):
 def get_dashboard():
     try:
         emp_data = get_employee_by_user(frappe.session.user, fields=["name", "company","employee_name"])
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         attendance_details = get_attendance_details(emp_data)
         log_details = get_last_log_details(emp_data.get("name"))
         a,b=get_leave_balance_dashboard()
@@ -246,6 +248,8 @@ def change_password(**kwargs):
 def get_profile():
     try:
         emp_data = get_employee_by_user(frappe.session.user)
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         employee_details = frappe.get_cached_value(
             "Employee",
             emp_data.get("name"),
@@ -305,6 +309,8 @@ def add_note_in_lead(doc_name, note):
 def update_profile_picture():
     try:
         emp_data = get_employee_by_user(frappe.session.user)
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         from frappe.handler import upload_file
 
         employee_profile_picture = upload_file()
@@ -353,6 +359,8 @@ def delete_note_in_lead(doc_name, row_id):
 @frappe.whitelist()
 def get_data_from_notes(doc_name):
     emp_data = get_employee_by_user(frappe.session.user, fields=["name", "company", "employee_name"])
+    if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
     doc = frappe.get_doc("Lead", {'name': doc_name}, ['notes'])
     note_li = []
     current_site = frappe.local.site
@@ -402,6 +410,8 @@ def create_employee_log(log_type, location=None):
         emp_data = get_employee_by_user(
             frappe.session.user, fields=["name", "default_shift"]
         )
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         log_doc = frappe.get_doc(
             dict(
                 doctype="Employee Checkin",
@@ -435,7 +445,8 @@ def get_holiday_list(year):
         if not year:
             return gen_response(500, "year is required")
         emp_data = get_employee_by_user(frappe.session.user)
-
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         from erpnext.setup.doctype.employee.employee import (
             get_holiday_list_for_employee,
         )
@@ -483,6 +494,8 @@ def get_holiday_list(year):
 def get_leave_balance_dashboard():
     try:
         emp_data = get_employee_by_user(frappe.session.user, fields=["name", "company"])
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         fiscal_year = get_fiscal_year(nowdate())[0]
         dashboard_data = {"leave_balance": []}
         if fiscal_year:
@@ -539,6 +552,8 @@ def make_leave_application(**kwargs):
 def get_leave_type(from_date=None, to_date=None):
     try:
         emp_data = get_employee_by_user(frappe.session.user)
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         leave_types = frappe.get_all(
             "Leave Type", filters={}, fields=["name", "'0' as balance"]
         )
@@ -558,6 +573,8 @@ def get_leave_type(from_date=None, to_date=None):
 def get_expense_list(month=None, year=None):
     try:
         emp_data = get_employee_by_user(frappe.session.user)
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         if not len(emp_data) >= 1:
             return gen_response(500, "Employee does not exist")
         validate_employee_data(emp_data)
@@ -612,6 +629,8 @@ def get_attendance_list(year=None, month=None):
         if not year or not month:
             return gen_response(500, "year and month is required", [])
         emp_data = get_employee_by_user(frappe.session.user)
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         present_count = 0
         absent_count = 0
         late_count = 0
@@ -728,7 +747,8 @@ def apply_expense():
         emp_data = get_employee_by_user(
             frappe.session.user, fields=["name", "company", "expense_approver"]
         )
-
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         if not len(emp_data) >= 1:
             return gen_response(500, "Employee does not exists")
         validate_employee_data(emp_data)
@@ -769,6 +789,8 @@ def apply_expense():
 def get_leave_application_list():
     try:
         emp_data = get_employee_by_user(frappe.session.user)
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         validate_employee_data(emp_data)
         leave_application_fields = [
             "name",
@@ -830,6 +852,8 @@ def book_expense(**kwargs):
         emp_data = get_employee_by_user(
             frappe.session.user, fields=["name", "company", "expense_approver"]
         )
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         if not len(emp_data) >= 1:
             return gen_response(500, "Employee does not exists")
         validate_employee_data(emp_data)
@@ -888,6 +912,8 @@ def get_payable_account(company):
 def get_attendance_details_dashboard():
     try:
         emp_data = get_employee_by_user(frappe.session.user, fields=["name", "company"])
+        if isinstance(emp_data, str):
+            return gen_response(400,emp_data)
         attendance_details = get_attendance_details(emp_data)
         return gen_response(
             200, "Attendance data get successfully", attendance_details

@@ -1,5 +1,7 @@
 import frappe
 from frappe import _
+import requests
+import time
 from mobile.mobile_env.app_utils import (
     gen_response,
     ess_validate,
@@ -50,7 +52,7 @@ from frappe.utils import (
 @frappe.whitelist()
 def user_location(longitude, latitude,device_id):
     try:
-       
+        traccar_setting=frappe.get_single('Traccar Setting')
         data =  {
         "device_id":device_id,
         "location_table": [
@@ -118,7 +120,10 @@ def user_location(longitude, latitude,device_id):
             # frappe.log_error(title="ESS Mobile App debug", message=compact_json)
             location_doc.location_map = compact_json
             location_doc.save()
-
+        # responce=requests.post(traccar_setting.traccar_url,params={"id":device_id,"timestamp":time.time(),"lat":latitude,"lon":longitude})
+        responce=requests.post(f"{traccar_setting.traccar_url}?id={device_id}&timestamp={int(round(time.time() * 1000))}&lat={latitude}&lon={longitude}")
+        if responce.status_code == 200:
+           frappe.msgprint(str(responce.status_code))
         gen_response(200, "Location updated successfully.",location_doc)
 
     except Exception as e:

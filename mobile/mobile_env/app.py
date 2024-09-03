@@ -74,7 +74,7 @@ def get_user_document():
 @frappe.whitelist()
 def user_has_permission():
     permission_list=[]
-    doclist=["sales Invoice","Sales Order","Lead","Quotation","Leave Application","Expense Claim","Attendance","Customer"]
+    doclist=["Sales Invoice","Sales Order","Lead","Quotation","Leave Application","Expense Claim","Attendance","Customer","Visit"]
     for i in doclist:
         permission=has_permission(i)
         if permission:
@@ -191,18 +191,19 @@ def get_dashboard():
 @frappe.whitelist()
 def get_emp_name():
     try:
-        emp_data = get_employee_by_user(frappe.session.user, fields=["name", "company","employee_name"])
-        current_site=frappe.local.site
+        emp_data = frappe.get_doc("User",frappe.session.user)
+        global_defaults = get_global_defaults()
+        company = global_defaults.get("default_company")
         dashboard_data = {
           
-            "emp_name":emp_data.get("employee_name"),
-            "email":frappe.session.user,
-            "company": emp_data.get("company") or "Employee Dashboard",
+            "emp_name":emp_data.full_name,
+            "email":emp_data.email,
+            "company": company if company else None,
         }
         str1=frappe.get_cached_value(
-            "Employee", emp_data.get("name"), "image"
+            "User",frappe.session.user, "user_image",
         )
-       
+      
         if str1 is not None:
             dashboard_data["employee_image"] = frappe.utils.get_url()+ str1
         else:
@@ -378,7 +379,7 @@ def get_data_from_notes(doc_name):
         note_dict["commented"] = str(i.added_by)
         
         # Check if added_on is not None before formatting
-        note_dict["added_on"] = i.added_on.strftime("%I:%M %p") if i.added_on else None
+        note_dict["added_on"] = pretty_date(i.creation)
         str1 = frappe.get_value(
                 "User", i.added_by, "user_image", cache=True
             )
@@ -408,7 +409,6 @@ def create_employee_log(log_type, location=None):
                 log_type=log_type,
                 time=now_datetime().__str__()[:-7],
                 custom_location=location,
-               
             )
         ).insert(ignore_permissions=True)
         update_shift_last_sync(emp_data)
@@ -708,7 +708,7 @@ def filter_customer_list():
     try:
         global_defaults = get_global_defaults()
         company = global_defaults.get("default_company")
-        list = frappe.get_all(
+        list = frappe.get_list(
             "Lead",
                 fields=[
                     "company_name"

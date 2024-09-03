@@ -1,0 +1,67 @@
+import json
+from functools import wraps
+import frappe
+from pydantic import BaseModel, ValidationError
+from typing import Type
+
+
+def validate_request(model: Type[BaseModel]):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                data = json.loads(frappe.request.data)
+                validated_data = model(**data)
+                return func(validated_data)
+            except ValidationError as e:
+                return {
+                    "status": "error",
+                    "message": "Validation error",
+                    "errors": e.errors(),
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+        wrapper._model = model
+        return wrapper
+    return decorator
+
+
+class UserModel(BaseModel):
+    email: str
+    username: str
+    age: int
+
+
+@frappe.whitelist(allow_guest=True)
+@validate_request(UserModel)
+def add_user(validated_data: UserModel):
+    try:
+        utils.validator.validate_http_method("POST")
+        new_user = frappe.get_doc({
+            "doctype": "User",
+            "email": validated_data.email,
+            "username": validated_data.username,
+            "first_name": validated_data.username,
+            "age": validated_data.age,
+        })
+        new_user.insert(ignore_permissions=True)
+        return {
+            "status": "success",
+            "message": "User created successfully",
+            "data": new_user.as_dict(),
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@frappe.whitelist()
+def get_customer(cust_code: str):
+    try:
+        utils.validator.validate_http_method("GET")
+        try:
+            customer = frappe.get_doc("Loan Customer", cust_code)
+        except DoesNotExistError:
+            raise lms.exceptions.NotFoundException(_("Pincode not found"))
+        return utils.respondWithSuccess(data=customer)
+    except utils.exceptions.APIException as e:
+        lms.log_api_error()
+        return e.respond()

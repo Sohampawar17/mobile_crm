@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Swagger UI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function () {
+      const initializeSwaggerUI = async () => {
+        const ui = SwaggerUIBundle({
+          url: "/api/method/mobile.mobile_env.swagger.get_swagger_json", // Adjust path as needed
+          dom_id: "#swagger-ui",
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: "StandaloneLayout",
+          requestInterceptor: (request) => {
+            // Add your authentication token here
+            request.headers["Authorization"] = "Bearer YOUR_AUTH_TOKEN"; // Replace YOUR_AUTH_TOKEN with the actual token
+            return request;
+          },
+          // Optionally, add security schemes to the Swagger UI config
+          authAction: {
+            authorize: {
+              // This will add an 'Authorize' button to Swagger UI
+              type: "apiKey",
+              name: "Authorization",
+              in: "header",
+              description: "Enter your Bearer token here."
+            }
+          }
+        });
+        window.ui = ui;
+      };
+      initializeSwaggerUI();
+    };
+  </script>
+</body>
+</html>

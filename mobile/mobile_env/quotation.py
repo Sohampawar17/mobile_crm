@@ -1,7 +1,6 @@
 import json
 import frappe
 from frappe import _
-
 from erpnext.accounts.utils import getdate
 from mobile.mobile_env.app_utils import (
     gen_response,
